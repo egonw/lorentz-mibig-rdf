@@ -21,11 +21,12 @@ println "PREFIX inchikey: <http://semanticscience.org/resource/CHEMINF_000059>"
 println "PREFIX bigcat: <http://www.bigcat.unimaas.nl/mibig-rdf/onto/>"
 println "PREFIX cluster: <http://www.bigcat.unimaas.nl/mibig-rdf/cluster/>"
 println "PREFIX cmpd: <http://www.bigcat.unimaas.nl/mibig-rdf/compound/>"
+println "PREFIX gene: <http://www.bigcat.unimaas.nl/mibig-rdf/gene/>"
 
 println "PREFIX ncbitaxon: <http://www.identifiers.org/ncbitaxon/>"
 println "PREFIX inchikeyuri: <http://www.identifiers.org/inchikey/>"
 println "PREFIX pubmed: <http://www.identifiers.org/pubmed/>"
-println "";
+println ""
 
 folder.eachFileRecurse FileType.FILES,  { file ->
   if (file.name.endsWith(".json")) {
@@ -39,13 +40,17 @@ folder.eachFileRecurse FileType.FILES,  { file ->
     cmpdData = "";
     data.cluster.compounds.each { compound ->
       // println "#  compound SMILES: ${compound.chem_struct}"
-      mol = cdk.fromSMILES(compound.chem_struct)
-      molInChI = inchi.generate(mol)
-      molURI = "inchikeyuri:${molInChI.key}"
-      println "  bigcat:compound ${molURI} ;"
-      cmpdData += "${molURI} rdfs:label \"${compound.compound}\" ;\n" +
-                  "  smiles: \"${compound.chem_struct}\" ;\n" +
-                  "  inchikey: \"${molInChI.key}\" .\n\n"
+      if (compound.chem_struct) {
+        try {
+          mol = cdk.fromSMILES(compound.chem_struct)
+          molInChI = inchi.generate(mol)
+          molURI = "inchikeyuri:${molInChI.key}"
+          println "  bigcat:compound ${molURI} ;"
+          cmpdData += "${molURI} rdfs:label \"${compound.compound}\" ;\n" +
+                      "  smiles: \"${compound.chem_struct}\" ;\n" +
+                      "  inchikey: \"${molInChI.key}\" .\n\n"
+        } catch (Exception e) {} //ignore for now
+      }
     }
 
     // genes
@@ -53,6 +58,13 @@ folder.eachFileRecurse FileType.FILES,  { file ->
     if (data.cluster.genes) {
       data.cluster.genes.annotations.each { gene ->
         // println "#  gene: ${gene.id}"
+        geneURI = "gene:${gene.id}"
+        println "  bigcat:gene ${geneURI} ;"
+        if (gene.name) {
+          genesData += "${geneURI} rdfs:label \"${gene.name}\" .\n"
+        } else {
+            genesData += "${geneURI} rdfs:label \"${gene.id}\" .\n"
+        }
       }
     }
 
@@ -68,7 +80,5 @@ folder.eachFileRecurse FileType.FILES,  { file ->
     println "ncbitaxon:${data.cluster.ncbi_tax_id} rdfs:label \"${data.cluster.organism_name}\" .\n"
     println cmpdData; println "";
     println genesData;
-
-    System.exit(0)
   }
 }
