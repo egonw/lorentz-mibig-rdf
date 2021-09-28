@@ -74,6 +74,9 @@ folder.eachFileRecurse FileType.FILES,  { file ->
     pubsData = "";
     if (data.cluster.publications) {
       data.cluster.publications.each { pub ->
+        if (pub.startsWith("doi:")) {
+          pub = "<https://doi.org/" + pub.substring(4) + ">"
+        }
         println "  cito:cites ${pub} ;"
       }
     }
