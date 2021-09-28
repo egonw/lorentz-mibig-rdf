@@ -22,6 +22,7 @@ println "PREFIX bigcat: <http://www.bigcat.unimaas.nl/mibig-rdf/onto/>"
 println "PREFIX cluster: <http://www.bigcat.unimaas.nl/mibig-rdf/cluster/>"
 println "PREFIX cmpd: <http://www.bigcat.unimaas.nl/mibig-rdf/compound/>"
 println "PREFIX gene: <http://www.bigcat.unimaas.nl/mibig-rdf/gene/>"
+println "PREFIX patent: <http://www.bigcat.unimaas.nl/mibig-rdf/patent/>"
 
 println "PREFIX ncbitaxon: <http://www.identifiers.org/ncbitaxon/>"
 println "PREFIX inchikeyuri: <http://www.identifiers.org/inchikey/>"
@@ -70,7 +71,7 @@ folder.eachFileRecurse FileType.FILES,  { file ->
         println "  bigcat:gene ${geneURI} ;"
         if (gene.name) {
           genesData += "${geneURI} rdfs:label \"${gene.name}\" .\n"
-        } else {
+        } else if (geneID != "No protein ID") {
           genesData += "${geneURI} rdfs:label \"${gene.id}\" .\n"
         }
       }
@@ -82,6 +83,8 @@ folder.eachFileRecurse FileType.FILES,  { file ->
       data.cluster.publications.each { pub ->
         if (pub.startsWith("doi:")) {
           pub = "<https://doi.org/" + pub.substring(4) + ">"
+        } else if (pub.startsWith("url:")) {
+          pub = "<" + pub.substring(4) + ">"
         }
         println "  cito:cites ${pub} ;"
       }
