@@ -1,0 +1,5 @@
+PREFIX smiles: <http://semanticscience.org/resource/CHEMINF_000018>
+
+SELECT ?smiles WHERE {
+  [] smiles: ?smiles .
+}
