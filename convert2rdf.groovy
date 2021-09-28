@@ -39,15 +39,17 @@ folder.eachFileRecurse FileType.FILES,  { file ->
     // compounds
     cmpdData = "";
     data.cluster.compounds.each { compound ->
-      // println "#  compound SMILES: ${compound.chem_struct}"
-      if (compound.chem_struct) {
+      smiles = compound.chem_struct
+      // println "#  compound SMILES: ${smiles}"
+      if (smiles) {
         try {
-          mol = cdk.fromSMILES(compound.chem_struct)
+          mol = cdk.fromSMILES(smiles)
           molInChI = inchi.generate(mol)
           molURI = "inchikeyuri:${molInChI.key}"
           println "  bigcat:compound ${molURI} ;"
+          smiles = smiles.replace("\\","\\\\")
           cmpdData += "${molURI} rdfs:label \"${compound.compound}\" ;\n" +
-                      "  smiles: \"${compound.chem_struct}\" ;\n" +
+                      "  smiles: \"${smiles}\" ;\n" +
                       "  inchikey: \"${molInChI.key}\" .\n\n"
         } catch (Exception e) {} //ignore for now
       }
