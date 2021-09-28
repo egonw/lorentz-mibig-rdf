@@ -28,6 +28,7 @@ println "PREFIX inchikeyuri: <http://www.identifiers.org/inchikey/>"
 println "PREFIX pubmed: <http://www.identifiers.org/pubmed/>"
 println ""
 
+noIDgeneCounter = 0
 folder.eachFileRecurse FileType.FILES,  { file ->
   if (file.name.endsWith(".json")) {
     clusterID = file.name.replace(".json","")
@@ -60,12 +61,17 @@ folder.eachFileRecurse FileType.FILES,  { file ->
     if (data.cluster.genes) {
       data.cluster.genes.annotations.each { gene ->
         // println "#  gene: ${gene.id}"
-        geneURI = "gene:${gene.id}"
+        geneID = gene.id
+        if (geneID = "No protein ID") {
+          noIDgeneCounter = noIDgeneCounter + 1
+          geneID = "gene" + noIDgeneCounter
+        }
+        geneURI = "gene:${geneID}"
         println "  bigcat:gene ${geneURI} ;"
         if (gene.name) {
           genesData += "${geneURI} rdfs:label \"${gene.name}\" .\n"
         } else {
-            genesData += "${geneURI} rdfs:label \"${gene.id}\" .\n"
+          genesData += "${geneURI} rdfs:label \"${gene.id}\" .\n"
         }
       }
     }
